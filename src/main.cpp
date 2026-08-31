@@ -7,6 +7,7 @@
 #include "missionDataReader.h"
 #include "missionDataWriter.h"
 #include "missionTypeSupport.h"
+#include "task_plan.h"
 
 #include <algorithm>
 #include <chrono>
@@ -364,47 +365,58 @@ public:
         }
     }
 
-    void publish_incident_plan() {
-        // This deterministic adapter is the offline LLM test double. A production LLM must
-        // validate into this TaskRequest schema before calling the DDS writer.
-        publish_task("INC-2026-001-SURVEY", TASK_SURVEY, "CAMERA_THERMAL", "", 0.0,
-            31.23160, 121.47520, 28.0, 90);
-        publish_task("INC-2026-001-DELIVERY", TASK_DELIVERY, "MEDICAL_PAYLOAD",
-            "INC-2026-001-SURVEY", 2.5, 31.23140, 121.47460, 0.0, 240);
+    void publish_incident_plan(const taskplan::Plan& plan) {
+        for (const taskplan::Task& task : plan.tasks) {
+            publish_task(task);
+        }
     }
 
 private:
-    void publish_task(
-        const std::string& task_id,
-        TaskKind kind,
-        const std::string& capability,
-        const std::string& predecessor,
-        double payload_kg,
-        double latitude_deg,
-        double longitude_deg,
-        double altitude_m,
-        long deadline_s) {
+    static TaskKind task_kind(const std::string& value) {
+        if (value == "SURVEY") {
+            return TASK_SURVEY;
+        }
+        if (value == "DELIVERY") {
+            return TASK_DELIVERY;
+        }
+        throw std::runtime_error("Unsupported task kind after plan validation: " + value);
+    }
+
+    static TaskPriority task_priority(const std::string& value) {
+        if (value == "NORMAL") {
+            return PRIORITY_NORMAL;
+        }
+        if (value == "HIGH") {
+            return PRIORITY_HIGH;
+        }
+        if (value == "CRITICAL") {
+            return PRIORITY_CRITICAL;
+        }
+        throw std::runtime_error("Unsupported task priority after plan validation: " + value);
+    }
+
+    void publish_task(const taskplan::Task& input) {
         TaskRequest task;
         TaskRequestInitialize(&task);
-        set_text(task.task_id, task_id);
-        set_text(task.incident_id, "INC-2026-001");
-        task.kind = kind;
-        task.priority = PRIORITY_CRITICAL;
-        task.revision = 1;
-        set_text(task.required_capability, capability);
-        task.target_wgs84.latitude_deg = latitude_deg;
-        task.target_wgs84.longitude_deg = longitude_deg;
-        task.target_wgs84.altitude_m = altitude_m;
+        set_text(task.task_id, input.task_id);
+        set_text(task.incident_id, input.incident_id);
+        task.kind = task_kind(input.kind);
+        task.priority = task_priority(input.priority);
+        task.revision = input.revision;
+        set_text(task.required_capability, input.required_capability);
+        task.target_wgs84.latitude_deg = input.target_wgs84.latitude_deg;
+        task.target_wgs84.longitude_deg = input.target_wgs84.longitude_deg;
+        task.target_wgs84.altitude_m = input.target_wgs84.altitude_m;
         set_pose(task.target_enu, Pose{});
-        set_text(task.predecessor_task_id, predecessor);
-        task.payload_kg = payload_kg;
-        task.deadline_s = deadline_s;
-        set_text(task.frame_id, "park_enu_v1");
-        set_text(task.map_version, "campus-map-2026.1");
+        set_text(task.predecessor_task_id, input.predecessor_task_id);
+        task.payload_kg = input.payload_kg;
+        task.deadline_s = input.deadline_s;
+        set_text(task.frame_id, input.frame_id);
+        set_text(task.map_version, input.map_version);
         task.created_at_ms = now_ms();
         publish(task_writer_, task, "Mission.TaskRequest.write");
-        publish_event(event_writer_, "event-plan-" + task_id, "INC-2026-001", task_id,
-            "planner-agent", EVENT_TASK_PUBLISHED, PRIORITY_CRITICAL, "typed_plan_published");
+        publish_event(event_writer_, "event-plan-" + input.task_id, input.incident_id, input.task_id,
+            "planner-agent", EVENT_TASK_PUBLISHED, task.priority, "validated_json_plan_published");
         TaskRequestFinalize(&task);
     }
 
@@ -950,14 +962,28 @@ private:
     std::vector<DashboardEvent> events_;
 };
 
-std::filesystem::path dashboard_path_from_args(int argc, char** argv) {
-    std::filesystem::path output = "dashboard/telemetry.json";
-    for (int index = 1; index + 1 < argc; ++index) {
-        if (std::string(argv[index]) == "--dashboard") {
-            output = argv[index + 1];
+std::filesystem::path path_from_args(
+    int argc,
+    char** argv,
+    const std::string& option,
+    const std::filesystem::path& default_value) {
+    for (int index = 1; index < argc; ++index) {
+        if (std::string(argv[index]) == option) {
+            if (index + 1 >= argc) {
+                throw std::runtime_error("Missing path after " + option);
+            }
+            return argv[index + 1];
         }
     }
-    return output;
+    return default_value;
+}
+
+std::filesystem::path dashboard_path_from_args(int argc, char** argv) {
+    return path_from_args(argc, argv, "--dashboard", "dashboard/telemetry.json");
+}
+
+std::filesystem::path task_plan_path_from_args(int argc, char** argv) {
+    return path_from_args(argc, argv, "--task-plan", "task_plan.json");
 }
 
 void finalize_type_supports() {
@@ -974,6 +1000,8 @@ void finalize_type_supports() {
 
 int main(int argc, char** argv) {
     try {
+        const std::filesystem::path plan_path = task_plan_path_from_args(argc, argv);
+        const taskplan::Plan plan = taskplan::load_file(plan_path);
         {
             DdsNode planner_node("planner-agent");
             DdsNode coordinate_node("coordinate-service");
@@ -993,7 +1021,7 @@ int main(int argc, char** argv) {
             settle(500);
             uav.publish_capability();
             ugv.publish_capability();
-            planner.publish_incident_plan();
+            planner.publish_incident_plan(plan);
             settle();
             coordinates.process_tasks();
             settle();
@@ -1015,11 +1043,13 @@ int main(int argc, char** argv) {
             if (!dashboard.write_snapshot(output)) {
                 throw std::runtime_error("Unable to write dashboard snapshot: " + output.string());
             }
-            if (dashboard.completed_task_count() != 2) {
+            if (dashboard.completed_task_count() != plan.tasks.size()) {
                 throw std::runtime_error("Demo invariant failed: both dependent tasks were not completed");
             }
 
-            std::cout << "ZRDDS demo completed: 2 dependent tasks dispatched through typed DDS topics.\n";
+            std::cout << "ZRDDS demo completed: " << plan.tasks.size()
+                      << " dependent tasks dispatched through typed DDS topics.\n";
+            std::cout << "Task plan: " << std::filesystem::absolute(plan_path).string() << "\n";
             std::cout << "Dashboard snapshot: " << std::filesystem::absolute(output).string() << "\n";
         }
 

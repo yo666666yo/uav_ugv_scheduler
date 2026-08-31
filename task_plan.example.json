@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "task_id": "INC-2026-001-SURVEY",
+      "incident_id": "INC-2026-001",
+      "kind": "SURVEY",
+      "priority": "CRITICAL",
+      "revision": 1,
+      "required_capability": "CAMERA_THERMAL",
+      "target_wgs84": {
+        "latitude_deg": 31.2316,
+        "longitude_deg": 121.4752,
+        "altitude_m": 28.0
+      },
+      "predecessor_task_id": "",
+      "payload_kg": 0.0,
+      "deadline_s": 90,
+      "frame_id": "park_enu_v1",
+      "map_version": "campus-map-2026.1"
+    },
+    {
+      "task_id": "INC-2026-001-DELIVERY",
+      "incident_id": "INC-2026-001",
+      "kind": "DELIVERY",
+      "priority": "CRITICAL",
+      "revision": 1,
+      "required_capability": "MEDICAL_PAYLOAD",
+      "target_wgs84": {
+        "latitude_deg": 31.2314,
+        "longitude_deg": 121.4746,
+        "altitude_m": 0.0
+      },
+      "predecessor_task_id": "INC-2026-001-SURVEY",
+      "payload_kg": 2.5,
+      "deadline_s": 240,
+      "frame_id": "park_enu_v1",
+      "map_version": "campus-map-2026.1"
+    }
+  ]
+}

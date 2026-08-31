@@ -18,7 +18,7 @@ foreach(source_file IN LISTS GENERATED_SOURCES)
     endif()
 endforeach()
 
-add_executable(scheduler_demo src/main.cpp ${GENERATED_SOURCES})
+add_executable(scheduler_demo src/main.cpp src/task_plan.cpp ${GENERATED_SOURCES})
 target_include_directories(scheduler_demo PRIVATE
     "${ZRDDS_ROOT}/include/ZRDDSCoreInterface"
     "${ZRDDS_ROOT}/include/CPlusPlusInterface"

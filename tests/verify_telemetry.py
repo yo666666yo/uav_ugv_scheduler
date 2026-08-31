@@ -17,16 +17,25 @@ def events_for(events: List[Dict], task_id: str, kind: str) -> List[Dict]:
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
     snapshot = root / "dashboard" / "telemetry.json"
+    plan_path = root / "task_plan.json"
     if not snapshot.is_file():
         fail(f"Missing snapshot: {snapshot}. Run scripts/run_demo.ps1 first.")
+    if not plan_path.is_file():
+        fail(f"Missing task plan: {plan_path}. Run llm_planner.py first.")
 
     data = json.loads(snapshot.read_text(encoding="utf-8"))
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
     tasks = {task["id"]: task for task in data.get("tasks", [])}
     vehicles = {vehicle["id"]: vehicle for vehicle in data.get("vehicles", [])}
     events = data.get("events", [])
 
-    survey_id = "INC-2026-001-SURVEY"
-    delivery_id = "INC-2026-001-DELIVERY"
+    planned_tasks = plan.get("tasks", [])
+    surveys = [task for task in planned_tasks if task.get("kind") == "SURVEY"]
+    deliveries = [task for task in planned_tasks if task.get("kind") == "DELIVERY"]
+    if len(surveys) != 1 or len(deliveries) != 1:
+        fail("Task plan must contain exactly one SURVEY and one DELIVERY")
+    survey_id = surveys[0]["task_id"]
+    delivery_id = deliveries[0]["task_id"]
     if set(tasks) != {survey_id, delivery_id}:
         fail(f"Expected exactly the survey and delivery tasks, found {sorted(tasks)}")
     if tasks[survey_id].get("assigned_to") != "uav-alpha":

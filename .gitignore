@@ -1,6 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
 build/
 generated/
+task_plan.json
 dashboard/telemetry.json
 dashboard/telemetry.ndjson
 *.ddslog
-__pycache__/
