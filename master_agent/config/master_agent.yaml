@@ -1,0 +1,21 @@
+# 总 Agent 本地配置（设备相关安全配置放设备侧，不在此文件——规范第 12 节）
+
+master_agent:
+  # DDS 后端: memory(开发/演示) | zrdds(bridge 就绪后)
+  bus_backend: memory
+  domain_id: 42
+
+  # 设备状态目录超时策略（架构说明 4.2）
+  registry:
+    stale_warn_s: 3.0
+    offline_s: 5.0
+
+  # LLM 任务解析（不配置 key 时自动降级为正则解析）
+  llm:
+    provider: deepseek
+    model: deepseek-chat
+    # api_key 从环境变量 DEEPSEEK_API_KEY 读取，不要写进仓库
+
+  server:
+    host: 0.0.0.0
+    port: 8100
