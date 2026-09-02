@@ -14,7 +14,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .bus import DDSBus, TOPIC_AGENT_STATE, TOPIC_TASK_FEEDBACK
+from .bus import (
+    DDSBus,
+    TOPIC_AGENT_STATE,
+    TOPIC_TASK_ASSIGNMENT,
+    TOPIC_TASK_FEEDBACK,
+)
 from .mission_fsm import MissionFSM
 from .models import now_ms
 from .parser import IntentParser
@@ -43,6 +48,7 @@ class MasterAgentServer:
         self.fsm = fsm
         self.parser = parser
         self.ws_clients: set[WebSocket] = set()
+        self.agent_links: dict[str, WebSocket] = {}  # agent_id -> 设备 WS 连接
         self.app = FastAPI(title="Group4 Master Agent")
         self.app.add_middleware(
             CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
@@ -58,6 +64,18 @@ class MasterAgentServer:
             await self.broadcast({"event": "task_feedback", "data": payload})
 
         self.bus.subscribe(TOPIC_TASK_FEEDBACK, forward_feedback)
+        self.bus.subscribe(TOPIC_TASK_ASSIGNMENT, self._route_assignment)
+
+    async def _route_assignment(self, topic: str, payload: dict) -> None:
+        """把总线上的 TaskAssignment 路由到目标设备的 WS 连接（设备网关下行）。"""
+        link = self.agent_links.get(payload.get("target_agent_id", ""))
+        if link is None:
+            logger.warning("任务分配路由失败，设备未连接: %s", payload.get("target_agent_id"))
+            return
+        try:
+            await link.send_text(json.dumps({"kind": "task_assignment", "data": payload}, ensure_ascii=False))
+        except Exception:
+            logger.exception("下行任务分配失败: %s", payload.get("target_agent_id"))
 
     async def _on_agent_state(self, topic: str, payload: dict) -> None:
         # 设备状态高频（1Hz），仅推增量摘要，避免刷屏
@@ -128,6 +146,39 @@ class MasterAgentServer:
                     for m in self.fsm.missions.values()
                 ]
             }
+
+        @app.websocket("/ws/agent")
+        async def ws_agent(ws: WebSocket):
+            """设备 Agent 接入网关。
+
+            协议（JSON 文本帧）：
+              设备 -> 总Agent: {"kind": "hello",        "data": {agent_id}}
+                                   {"kind": "agent_state", "data": AgentState}
+                                   {"kind": "task_feedback", "data": TaskFeedback}
+              总Agent -> 设备: {"kind": "task_assignment", "data": TaskAssignment}
+            ZRDDS bridge 就绪后，设备侧换成 C++ bridge 进程即可，本端点不动。
+            """
+            await ws.accept()
+            agent_id: str | None = None
+            try:
+                while True:
+                    msg = json.loads(await ws.receive_text())
+                    kind = msg.get("kind")
+                    data = msg.get("data") or {}
+                    if kind == "hello":
+                        agent_id = data.get("agent_id", "")
+                        self.agent_links[agent_id] = ws
+                        logger.info("设备接入: %s", agent_id)
+                    elif kind == "agent_state":
+                        await self.bus.publish(TOPIC_AGENT_STATE, data)
+                    elif kind == "task_feedback":
+                        await self.bus.publish(TOPIC_TASK_FEEDBACK, data)
+            except WebSocketDisconnect:
+                pass
+            finally:
+                if agent_id and self.agent_links.get(agent_id) is ws:
+                    del self.agent_links[agent_id]
+                    logger.info("设备断开: %s", agent_id)
 
         @app.websocket("/ws/events")
         async def ws_events(ws: WebSocket):

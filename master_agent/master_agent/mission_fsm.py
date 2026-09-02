@@ -54,6 +54,10 @@ class Mission:
     image_url: str | None = None
     garbage_detected: bool | None = None
     events: list[dict] = field(default_factory=list)  # 推给 /ws/events 的事件流
+    # 失败重分配（架构说明 4.4：可选换设备重试）
+    failed_agents: set[str] = field(default_factory=set)
+    reassign_count: int = 0
+    MAX_REASSIGN = 3
 
 
 class MissionFSM:
@@ -171,15 +175,34 @@ class MissionFSM:
         await self._emit(m, "task_assigned", f"无人车 {sel.agent.agent_id} 距离目标最近，已分配清理任务")
 
     def _select(self, task_type: TaskType, m: Mission) -> SelectionResult | None:
-        sel = select_nearest(self.registry, m.target, task_type)
+        sel = select_nearest(self.registry, m.target, task_type, exclude=m.failed_agents)
         if sel is None:
             return None
         m.events.append({"event": "selection", "detail": sel.reason})  # 分配理由留痕
         return sel
 
     async def _on_failure(self, m: Mission, fb: TaskFeedback) -> None:
-        """失败处理：中期直接置 FAILED；后期在此实现重选设备（架构说明 4.4）。"""
-        await self._fail(m, f"{fb.agent_id} 反馈 {fb.status.value}/{fb.failure_code}: {fb.message}")
+        """失败处理：拉黑故障设备，重选一台重试（最多 MAX_REASSIGN 次）。"""
+        reason = f"{fb.agent_id} 反馈 {fb.status.value}/{fb.failure_code}: {fb.message}"
+        m.failed_agents.add(fb.agent_id)
+        m.reassign_count += 1
+
+        if m.reassign_count > m.MAX_REASSIGN:
+            await self._fail(m, f"{reason}；重试次数已用尽")
+            return
+
+        await self._emit(m, "task_failed", f"{reason}，尝试换设备重分配（{m.reassign_count}/{m.MAX_REASSIGN}）")
+        # 复位到失败前的等待阶段，重新选设备（排除故障设备）
+        if fb.task_id == m.inspect_task_id:
+            m.phase = MissionPhase.CREATED
+            m.inspect_task_id = None
+            await self._assign_uav(m)
+        elif fb.task_id == m.pickup_task_id:
+            m.phase = MissionPhase.AWAITING_CONFIRM
+            m.pickup_task_id = None
+            await self._assign_ugv(m)
+        else:
+            await self._fail(m, reason)
 
     async def _fail(self, m: Mission, reason: str) -> None:
         m.phase = MissionPhase.FAILED

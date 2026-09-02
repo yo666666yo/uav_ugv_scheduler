@@ -26,15 +26,19 @@ def select_nearest(
     registry: DeviceRegistry,
     target: Pose,
     task_type: TaskType,
+    exclude: set[str] | None = None,
 ) -> SelectionResult | None:
     """从满足条件的设备中选择距目标最近的一台。
 
     条件（规范/架构说明）：在线、空闲、电量足够、定位正常、具备能力、能到达。
     "能到达"在中期简化为坐标合法（frame 一致），后期接路径规划代价。
+    exclude: 排除的 agent_id 集合（失败重分配时拉黑故障设备）。
     """
     required = TASK_CAPABILITY.get(task_type)
     candidates = []
     for s in registry.snapshot():
+        if exclude and s.agent_id in exclude:
+            continue
         if s.work_state.value == "OFFLINE":
             continue
         if not DeviceRegistry.is_available(s, required):
