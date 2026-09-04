@@ -3,114 +3,518 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ZRDDS 协同调度沙盘</title>
+  <title>数字孪生城市指挥中心 · URBAN DIGITAL TWIN</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-brand" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="17" r="2.2"/><circle cx="19" cy="17" r="2.2"/><path d="M10.4 6.7 6.6 15M13.6 6.7 17.4 15M7.2 17h9.6"/></symbol>
+    <symbol id="i-drone" viewBox="0 0 24 24"><circle cx="5.5" cy="5.5" r="2.5"/><circle cx="18.5" cy="5.5" r="2.5"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/><rect x="9" y="9" width="6" height="6" rx="1.4"/><path d="M7.3 7.3 9 9M16.7 7.3 15 9M7.3 16.7 9 15M16.7 16.7 15 15"/></symbol>
+    <symbol id="i-rover" viewBox="0 0 24 24"><path d="M2 15V9.5h10.5V15"/><path d="M12.5 11h4l3.5 3v1"/><path d="M2 15h18"/><circle cx="7" cy="17.5" r="2.2"/><circle cx="16" cy="17.5" r="2.2"/></symbol>
+    <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3s5 4.2 5 9a5 5 0 0 1-10 0c0-2 1-3.4 1-3.4s.6 1.6 1.8 1.6C10.8 10.2 9 7 12 3Z"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><polyline points="20 4 20 9 15 9"/></symbol>
+    <symbol id="i-log" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h4M7 14h7M15 10h2"/></symbol>
+    <symbol id="i-sync" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.6M12 18.9v2.6M21.5 12h-2.6M5.1 12H2.5M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8M18.7 18.7l-1.8-1.8M7.1 7.1 5.3 5.3"/></symbol>
+    <symbol id="i-nav" viewBox="0 0 24 24"><polygon points="12 3 17 20 12 16.4 7 20"/></symbol>
+    <symbol id="i-stream" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="13" rx="2"/><path d="M9.5 9.2 14.5 11.5 9.5 13.8Z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6.5-6.2 6.5-11a6.5 6.5 0 1 0-13 0C5.5 14.8 12 21 12 21Z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+    <symbol id="i-jump" viewBox="0 0 24 24"><polygon points="7 4 19 12 7 20"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8"/></symbol>
+    <symbol id="i-nosignal" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M5 12.5a10 10 0 0 1 4-2.4M2 9a15 15 0 0 1 5.5-3.4M16.5 10.6A10 10 0 0 1 19 12.5M22 9a15 15 0 0 0-8.5-3.9"/><circle cx="12" cy="18" r="1.4"/></symbol>
+  </defs>
+</svg>
+
+<div class="shell">
+
+  <!-- ================================================= 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"><svg class="ico" aria-hidden="true"><use href="#i-brand"/></svg></span>
       <div>
-        <p class="eyebrow">ZRDDS / 多智能体应急响应</p>
-        <h1>无人机无人车协同调度</h1>
+        <p class="tag">Urban · Digital Twin</p>
+        <p class="brand-name">数字孪生城市指挥中心</p>
       </div>
-      <div class="connection" id="connection-status" aria-live="polite">
-        <span class="status-dot"></span>
-        <span>正在连接遥测桥</span>
+    </div>
+
+    <div class="topbar-center">
+      <div class="link-state">
+        <span class="dot" id="link-dot"></span>
+        <span class="tag" id="link-text">Connecting</span>
       </div>
-    </header>
+      <span class="pill is-demo" id="mode-pill"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>Demo</span>
 
-    <section class="summary-grid" aria-label="调度摘要">
-      <div class="summary-metric"><span>任务总数</span><strong id="task-count">--</strong></div>
-      <div class="summary-metric"><span>已完成</span><strong id="completed-count">--</strong></div>
-      <div class="summary-metric"><span>在线设备</span><strong id="vehicle-count">--</strong></div>
-      <div class="summary-metric"><span>DDS 域</span><strong id="domain-id">--</strong></div>
-    </section>
+      <div class="clock">
+        <span class="clock-time" id="clock-time">--:--:--</span>
+        <span class="clock-date" id="clock-date">----.--.-- UTC+8</span>
+      </div>
 
-    <section class="workspace" aria-label="调度工作区">
-      <section class="panel sandtable-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="section-label">实时位置</p>
-            <h2>校园应急沙盘</h2>
+      <div class="topbar-stats">
+        <div class="stat-pair"><span class="tag">FPS</span><b id="stat-fps">--</b></div>
+        <div class="stat-pair"><span class="tag">Agents</span><b id="stat-agents">--</b></div>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="btn is-sim" id="sim-1" aria-pressed="false"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>开始模拟1</button>
+      <button class="btn is-sim" id="sim-2" aria-pressed="false"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>开始模拟2</button>
+      <button class="btn is-mono" id="sim-reset"><svg class="ico sm" aria-hidden="true"><use href="#i-reset"/></svg>Reset</button>
+      <button class="icon-btn" id="toggle-log" aria-pressed="false" title="事件日志"><svg class="ico" aria-hidden="true"><use href="#i-log"/></svg></button>
+      <button class="icon-btn" id="force-sync" title="立即刷新遥测"><svg class="ico" aria-hidden="true"><use href="#i-sync"/></svg></button>
+      <button class="icon-btn" id="open-settings" aria-pressed="false" title="链路设置"><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg></button>
+    </div>
+  </header>
+
+  <!-- ================================================= 主区 -->
+  <div class="deck">
+
+    <!-- ---------------------------------------- 左栏：两路视频 -->
+    <div class="deck-col left">
+
+      <section class="panel" id="panel-aerial" data-domain="sense">
+        <div class="panel-head">
+          <span class="tag">Aerial</span>
+          <div class="seg" role="tablist" aria-label="无人机视图">
+            <button role="tab" aria-selected="false" data-view="patrol">巡检视角</button>
+            <button role="tab" aria-selected="true" data-view="detect">实时检测</button>
           </div>
-          <span class="frame-badge" id="frame-badge">CAMPUS_LOCAL</span>
+          <span class="head-spacer"></span>
+          <button class="icon-btn" data-full="panel-aerial" title="全屏"><svg class="ico" aria-hidden="true"><use href="#i-full"/></svg></button>
+          <button class="icon-btn" data-collapse="panel-aerial" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
         </div>
-        <div class="sandtable" id="sandtable" aria-label="校园应急响应沙盘">
-          <div class="zone zone-operations">指挥中心</div>
-          <div class="zone zone-clinic">校医院</div>
-          <div class="zone zone-library">图书馆</div>
-          <div class="zone zone-lawn">中央草坪</div>
-          <div class="road road-horizontal"></div>
-          <div class="road road-vertical"></div>
-          <div class="map-legend">
-            <span><i class="legend-marker uav-marker"></i>无人机</span>
-            <span><i class="legend-marker ugv-marker"></i>无人车</span>
-            <span><i class="legend-target"></i>任务目标</span>
+        <div class="panel-body">
+          <div class="feed is-dark" id="feed-uav">
+            <img alt="" id="feed-uav-img">
+            <div class="feed-scan"></div>
+            <div class="feed-empty"><svg aria-hidden="true"><use href="#i-nosignal"/></svg><span>No Signal</span></div>
+            <p class="feed-label">UAV Live Detection</p>
+            <button class="feed-action" data-refeed="uav">刷新实时流</button>
           </div>
-          <div class="map-items" id="map-items"></div>
         </div>
-        <div class="coordinate-readout" id="coordinate-readout">等待坐标转换</div>
+        <div class="panel-foot">
+          <div class="metric"><span class="tag">ALT</span><p class="metric-value"><span id="uav-alt">--</span><i>m</i></p></div>
+          <div class="metric"><span class="tag">SPD</span><p class="metric-value"><span id="uav-spd">--</span><i>km/h</i></p></div>
+          <div class="metric"><span class="tag">BAT</span><p class="metric-value"><span id="uav-bat">--</span><i>%</i></p></div>
+          <div class="metric"><span class="tag">LINK</span><p class="metric-value"><span id="uav-link">--</span><i>ms</i></p></div>
+        </div>
       </section>
 
-      <aside class="panel vehicle-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="section-label">执行状态</p>
-            <h2>智能体设备</h2>
+      <section class="panel" id="panel-ground" data-domain="sense">
+        <div class="panel-head">
+          <span class="tag">Ground</span>
+          <span class="head-title">无人车视角</span>
+          <span class="head-sub">· CARLA-EGO</span>
+          <span class="dot is-live"></span>
+          <span class="head-spacer"></span>
+          <button class="icon-btn" data-full="panel-ground" title="全屏"><svg class="ico" aria-hidden="true"><use href="#i-full"/></svg></button>
+          <button class="icon-btn" data-collapse="panel-ground" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="panel-body">
+          <div class="feed is-dark" id="feed-ugv">
+            <img alt="" id="feed-ugv-img">
+            <div class="feed-scan"></div>
+            <div class="feed-empty"><svg aria-hidden="true"><use href="#i-nosignal"/></svg><span>No Signal</span></div>
+            <p class="feed-label">Real UGV View</p>
+            <button class="feed-action" data-refeed="ugv">刷新实时流</button>
           </div>
         </div>
-        <div class="vehicle-list" id="vehicle-list"></div>
-      </aside>
-    </section>
-
-    <section class="lower-grid">
-      <section class="panel task-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="section-label">任务编排</p>
-            <h2>依赖与分配</h2>
-          </div>
+        <div class="panel-foot">
+          <div class="metric"><span class="tag">SPD</span><p class="metric-value"><span id="ugv-spd">--</span><i>km/h</i></p></div>
+          <div class="metric"><span class="tag">HDG</span><p class="metric-value"><span id="ugv-hdg">--</span><i>°</i></p></div>
+          <div class="metric"><span class="tag">OBS</span><p class="metric-value is-safe" id="ugv-obs">安全</p></div>
+          <div class="metric"><span class="tag">LINK</span><p class="metric-value"><span id="ugv-link">--</span><i>ms</i></p></div>
         </div>
-        <div class="task-chain" id="task-chain"></div>
       </section>
 
-      <section class="panel event-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="section-label">DDS 审计事件</p>
-            <h2>执行时间线</h2>
-          </div>
-          <time id="generated-at">--</time>
-        </div>
-        <ol class="event-list" id="event-list"></ol>
-      </section>
-    </section>
+    </div>
 
-    <section class="panel topic-panel">
-      <div class="panel-heading">
-        <div>
-          <p class="section-label">数据空间</p>
-          <h2>Topic 与 QoS</h2>
+    <!-- ---------------------------------------- 中栏：鸟瞰图 -->
+    <div class="deck-col center">
+      <section class="panel map-panel" id="panel-map" data-domain="map">
+        <div class="panel-head">
+          <span class="tag">Map-3D</span>
+          <span class="head-title">3D 鸟瞰视图</span>
+          <span class="head-sub">· 城市数字孪生</span>
+          <span class="dot is-live"></span>
+          <span class="head-spacer"></span>
+          <div class="toggles">
+            <button class="toggle" data-layer="vehicles" aria-pressed="true">Vehicles</button>
+            <button class="toggle" data-layer="pedestrians" aria-pressed="false">Pedestrians</button>
+            <button class="toggle" data-layer="signals" aria-pressed="true">Signals</button>
+            <button class="toggle" data-layer="heatmap" aria-pressed="false">Heatmap</button>
+            <button class="toggle" data-layer="pixelstream" aria-pressed="true">UE4 Pixel Stream</button>
+          </div>
+          <button class="icon-btn" data-full="panel-map" title="全屏"><svg class="ico" aria-hidden="true"><use href="#i-full"/></svg></button>
         </div>
-        <span class="transport-label" id="transport-label">--</span>
-      </div>
-      <div class="topic-table-wrap">
-        <table>
-          <thead>
-            <tr><th>Topic</th><th>数据</th><th>可靠性</th><th>持久性</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Mission.TaskRequest</td><td>任务请求</td><td>RELIABLE</td><td>TRANSIENT_LOCAL</td></tr>
-            <tr><td>Mission.CandidateBid</td><td>候选报价</td><td>RELIABLE</td><td>VOLATILE</td></tr>
-            <tr><td>Mission.TaskAssignment</td><td>调度分配</td><td>RELIABLE</td><td>TRANSIENT_LOCAL</td></tr>
-            <tr><td>Mission.VehicleState</td><td>设备状态</td><td>RELIABLE</td><td>TRANSIENT_LOCAL</td></tr>
-            <tr><td>Mission.ExecutionEvent</td><td>审计事件</td><td>RELIABLE</td><td>TRANSIENT_LOCAL</td></tr>
-            <tr><td>Mission.CoordinateTransform</td><td>坐标投影</td><td>BEST_EFFORT</td><td>VOLATILE</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-  <script src="app.js"></script>
+
+        <div class="panel-body map-body">
+          <div class="map-viewport" id="map-viewport">
+            <svg class="map-scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-label="城市数字孪生鸟瞰图">
+              <defs>
+                <pattern id="grid-minor" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M20 0H0V20" fill="none" stroke="#dfe5ec" stroke-width="1"/>
+                </pattern>
+                <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+                  <rect width="100" height="100" fill="url(#grid-minor)"/>
+                  <path d="M100 0H0V100" fill="none" stroke="#cbd5e0" stroke-width="1.3"/>
+                </pattern>
+                <filter id="plot-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#16202c" flood-opacity="0.09"/>
+                </filter>
+                <filter id="bld-shadow" x="-12%" y="-12%" width="126%" height="126%">
+                  <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#16202c" flood-opacity="0.20"/>
+                </filter>
+                <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+                  <feGaussianBlur stdDeviation="9" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+                  <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#16202c" flood-opacity="0.20"/>
+                </filter>
+                <linearGradient id="ember" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#f6c9a0"/>
+                  <stop offset="40%" stop-color="#e0654a"/>
+                  <stop offset="100%" stop-color="#c14434" stop-opacity="0.1"/>
+                </linearGradient>
+              </defs>
+
+              <rect width="1200" height="800" fill="#eff3f7"/>
+              <rect width="1200" height="800" fill="url(#grid)"/>
+
+              <!-- 地块（街区地块，网格通道即为路网） -->
+              <g filter="url(#plot-shadow)">
+                <rect x="30" y="26" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="30" y="288" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="30" y="550" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="423" y="26" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="423" y="288" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="423" y="550" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="816" y="26" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="816" y="288" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+                <rect x="816" y="550" width="353" height="222" rx="4" fill="#f7f9fb" stroke="#dfe5ec" stroke-width="1.5"/>
+              </g>
+              <!-- 建筑与构筑物 -->
+              <g filter="url(#bld-shadow)">
+    <g class="b">
+      <rect x="56.0" y="56.0" width="104.0" height="68.0" rx="2" fill="#dae0e8"/>
+      <polygon points="141.5,28.7 160.0,56.0 160.0,124.0 141.5,96.7" fill="#e7ecf2"/>
+      <polygon points="37.5,96.7 56.0,124.0 160.0,124.0 141.5,96.7" fill="#ccd4de"/>
+      <rect x="37.5" y="28.7" width="104.0" height="68.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="186.0" y="56.0" width="88.0" height="68.0" rx="2" fill="#dae0e8"/>
+      <polygon points="258.9,33.7 274.0,56.0 274.0,124.0 258.9,101.7" fill="#e7ecf2"/>
+      <polygon points="170.9,101.7 186.0,124.0 274.0,124.0 258.9,101.7" fill="#ccd4de"/>
+      <rect x="170.9" y="33.7" width="88.0" height="68.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="296.0" y="72.0" width="78.0" height="34.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <rect x="56.0" y="160.0" width="200.0" height="40.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="56.0" y="318.0" width="150.0" height="60.0" rx="2" fill="#dae0e8"/>
+      <polygon points="189.2,293.2 206.0,318.0 206.0,378.0 189.2,353.2" fill="#e7ecf2"/>
+      <polygon points="39.2,353.2 56.0,378.0 206.0,378.0 189.2,353.2" fill="#ccd4de"/>
+      <rect x="39.2" y="293.2" width="150.0" height="60.0" rx="2" fill="#2f3945"/>
+    </g>
+    <circle cx="72.0" cy="419.1" r="26.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="129.2" cy="416.6" r="19.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="171.0" cy="414.6" r="13.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <rect x="236.0" y="398.0" width="138.0" height="34.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <rect x="236.0" y="442.0" width="138.0" height="26.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="56.0" y="580.0" width="110.0" height="62.0" rx="2" fill="#dae0e8"/>
+      <polygon points="150.9,557.7 166.0,580.0 166.0,642.0 150.9,619.7" fill="#e7ecf2"/>
+      <polygon points="40.9,619.7 56.0,642.0 166.0,642.0 150.9,619.7" fill="#ccd4de"/>
+      <rect x="40.9" y="557.7" width="110.0" height="62.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="192.0" y="580.0" width="74.0" height="62.0" rx="2" fill="#dae0e8"/>
+      <polygon points="254.2,562.6 266.0,580.0 266.0,642.0 254.2,624.6" fill="#e7ecf2"/>
+      <polygon points="180.2,624.6 192.0,642.0 266.0,642.0 254.2,624.6" fill="#ccd4de"/>
+      <rect x="180.2" y="562.6" width="74.0" height="62.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="284.0" y="594.0" width="90.0" height="34.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <rect x="56.0" y="678.0" width="318.0" height="44.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="459.0" y="56.0" width="84.0" height="66.0" rx="2" fill="#dae0e8"/>
+      <polygon points="526.2,31.2 543.0,56.0 543.0,122.0 526.2,97.2" fill="#e7ecf2"/>
+      <polygon points="442.2,97.2 459.0,122.0 543.0,122.0 526.2,97.2" fill="#ccd4de"/>
+      <rect x="442.2" y="31.2" width="84.0" height="66.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="569.0" y="56.0" width="84.0" height="66.0" rx="2" fill="#dae0e8"/>
+      <polygon points="636.2,31.2 653.0,56.0 653.0,122.0 636.2,97.2" fill="#e7ecf2"/>
+      <polygon points="552.2,97.2 569.0,122.0 653.0,122.0 636.2,97.2" fill="#ccd4de"/>
+      <rect x="552.2" y="31.2" width="84.0" height="66.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="679.0" y="56.0" width="84.0" height="66.0" rx="2" fill="#dae0e8"/>
+      <polygon points="746.2,31.2 763.0,56.0 763.0,122.0 746.2,97.2" fill="#e7ecf2"/>
+      <polygon points="662.2,97.2 679.0,122.0 763.0,122.0 746.2,97.2" fill="#ccd4de"/>
+      <rect x="662.2" y="31.2" width="84.0" height="66.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="459.0" y="160.0" width="304.0" height="36.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="465.0" y="322.0" width="120.0" height="58.0" rx="2" fill="#dae0e8"/>
+      <polygon points="570.7,300.9 585.0,322.0 585.0,380.0 570.7,358.9" fill="#e7ecf2"/>
+      <polygon points="450.7,358.9 465.0,380.0 585.0,380.0 570.7,358.9" fill="#ccd4de"/>
+      <rect x="450.7" y="300.9" width="120.0" height="58.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="617.0" y="322.0" width="120.0" height="58.0" rx="2" fill="#dae0e8"/>
+      <polygon points="722.7,300.9 737.0,322.0 737.0,380.0 722.7,358.9" fill="#e7ecf2"/>
+      <polygon points="602.7,358.9 617.0,380.0 737.0,380.0 722.7,358.9" fill="#ccd4de"/>
+      <rect x="602.7" y="300.9" width="120.0" height="58.0" rx="2" fill="#2f3945"/>
+    </g>
+    <circle cx="479.0" cy="421.7" r="22.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="527.4" cy="419.6" r="16.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="562.6" cy="418.2" r="12.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="629.0" cy="421.7" r="22.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="677.4" cy="419.6" r="16.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <circle cx="712.6" cy="418.2" r="12.0" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.5"/>
+    <g class="b">
+      <rect x="457.0" y="580.0" width="130.0" height="68.0" rx="2" fill="#dae0e8"/>
+      <polygon points="570.2,555.2 587.0,580.0 587.0,648.0 570.2,623.2" fill="#e7ecf2"/>
+      <polygon points="440.2,623.2 457.0,648.0 587.0,648.0 570.2,623.2" fill="#ccd4de"/>
+      <rect x="440.2" y="555.2" width="130.0" height="68.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="613.0" y="580.0" width="110.0" height="68.0" rx="2" fill="#dae0e8"/>
+      <polygon points="706.2,555.2 723.0,580.0 723.0,648.0 706.2,623.2" fill="#e7ecf2"/>
+      <polygon points="596.2,623.2 613.0,648.0 723.0,648.0 706.2,623.2" fill="#ccd4de"/>
+      <rect x="596.2" y="555.2" width="110.0" height="68.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="457.0" y="684.0" width="150.0" height="38.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <rect x="627.0" y="684.0" width="140.0" height="38.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="842.0" y="56.0" width="118.0" height="66.0" rx="2" fill="#dae0e8"/>
+      <polygon points="944.0,32.4 960.0,56.0 960.0,122.0 944.0,98.4" fill="#e7ecf2"/>
+      <polygon points="826.0,98.4 842.0,122.0 960.0,122.0 944.0,98.4" fill="#ccd4de"/>
+      <rect x="826.0" y="32.4" width="118.0" height="66.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="986.0" y="56.0" width="96.0" height="66.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1063.5,28.7 1082.0,56.0 1082.0,122.0 1063.5,94.7" fill="#e7ecf2"/>
+      <polygon points="967.5,94.7 986.0,122.0 1082.0,122.0 1063.5,94.7" fill="#ccd4de"/>
+      <rect x="967.5" y="28.7" width="96.0" height="66.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="1102.0" y="56.0" width="58.0" height="66.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <rect x="842.0" y="156.0" width="160.0" height="42.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="1022.0" y="152.0" width="138.0" height="46.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1149.1,135.9 1160.0,152.0 1160.0,198.0 1149.1,181.9" fill="#e7ecf2"/>
+      <polygon points="1011.1,181.9 1022.0,198.0 1160.0,198.0 1149.1,181.9" fill="#ccd4de"/>
+      <rect x="1011.1" y="135.9" width="138.0" height="46.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="842.0" y="328.0" width="120.0" height="62.0" rx="2" fill="#dae0e8"/>
+      <polygon points="945.2,303.2 962.0,328.0 962.0,390.0 945.2,365.2" fill="#e7ecf2"/>
+      <polygon points="825.2,365.2 842.0,390.0 962.0,390.0 945.2,365.2" fill="#ccd4de"/>
+      <rect x="825.2" y="303.2" width="120.0" height="62.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="982.0" y="338.0" width="44.0" height="110.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="1042.0" y="312.0" width="118.0" height="38.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1150.8,298.4 1160.0,312.0 1160.0,350.0 1150.8,336.4" fill="#e7ecf2"/>
+      <polygon points="1032.8,336.4 1042.0,350.0 1160.0,350.0 1150.8,336.4" fill="#ccd4de"/>
+      <rect x="1032.8" y="298.4" width="118.0" height="38.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="1042.0" y="362.0" width="118.0" height="38.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1150.8,348.4 1160.0,362.0 1160.0,400.0 1150.8,386.4" fill="#e7ecf2"/>
+      <polygon points="1032.8,386.4 1042.0,400.0 1160.0,400.0 1150.8,386.4" fill="#ccd4de"/>
+      <rect x="1032.8" y="348.4" width="118.0" height="38.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="1042.0" y="412.0" width="118.0" height="38.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1150.8,398.4 1160.0,412.0 1160.0,450.0 1150.8,436.4" fill="#e7ecf2"/>
+      <polygon points="1032.8,436.4 1042.0,450.0 1160.0,450.0 1150.8,436.4" fill="#ccd4de"/>
+      <rect x="1032.8" y="398.4" width="118.0" height="38.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="842.0" y="580.0" width="124.0" height="68.0" rx="2" fill="#dae0e8"/>
+      <polygon points="948.4,554.0 966.0,580.0 966.0,648.0 948.4,622.0" fill="#e7ecf2"/>
+      <polygon points="824.4,622.0 842.0,648.0 966.0,648.0 948.4,622.0" fill="#ccd4de"/>
+      <rect x="824.4" y="554.0" width="124.0" height="68.0" rx="2" fill="#2f3945"/>
+    </g>
+    <g class="b">
+      <rect x="992.0" y="580.0" width="96.0" height="68.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1073.7,558.9 1088.0,580.0 1088.0,648.0 1073.7,626.9" fill="#e7ecf2"/>
+      <polygon points="977.7,626.9 992.0,648.0 1088.0,648.0 1073.7,626.9" fill="#ccd4de"/>
+      <rect x="977.7" y="558.9" width="96.0" height="68.0" rx="2" fill="#2f3945"/>
+    </g>
+    <rect x="1110.0" y="590.0" width="50.0" height="58.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <rect x="842.0" y="684.0" width="200.0" height="38.0" rx="4" fill="#fbfcfd" stroke="#dce3ea" stroke-width="1.4"/>
+    <g class="b">
+      <rect x="1058.0" y="676.0" width="102.0" height="46.0" rx="2" fill="#dae0e8"/>
+      <polygon points="1149.9,661.1 1160.0,676.0 1160.0,722.0 1149.9,707.1" fill="#e7ecf2"/>
+      <polygon points="1047.9,707.1 1058.0,722.0 1160.0,722.0 1149.9,707.1" fill="#ccd4de"/>
+      <rect x="1047.9" y="661.1" width="102.0" height="46.0" rx="2" fill="#2f3945"/>
+    </g>
+              </g>
+              <!-- 巡逻航线：环绕中央街区 -->
+              <g id="layer-signals">
+                <rect x="405" y="268" width="389" height="262" rx="46" fill="none" stroke="#ffffff" stroke-width="13" filter="url(#glow)" opacity="0.85"/>
+                <rect x="405" y="268" width="389" height="262" rx="46" fill="none" stroke="#dbe7f4" stroke-width="5"/>
+                <rect x="405" y="268" width="389" height="262" rx="46" fill="none" stroke="#3a5a8c" stroke-width="1.4" opacity="0.55"/>
+                <rect id="route-runner" x="405" y="268" width="389" height="262" rx="46" fill="none" stroke="#3a5a8c" stroke-width="4" stroke-linecap="round" stroke-dasharray="44 1200"/>
+              </g>
+
+              <!-- 告警火线 -->
+              <g id="layer-alert" transform="translate(360 196) rotate(-40)">
+                <rect x="-72" y="-5" width="144" height="10" rx="5" fill="url(#ember)" filter="url(#glow)"/>
+              </g>
+
+              <!-- 交通流 -->
+              <g id="layer-vehicles">
+                <g filter="url(#soft)">
+                  <rect x="182" y="512" width="66" height="30" rx="3" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.4"/>
+                  <rect x="182" y="512" width="21" height="30" rx="3" fill="#dae0e8"/>
+                  <rect x="396" y="146" width="20" height="42" rx="3" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.4"/>
+                  <rect x="789" y="404" width="20" height="42" rx="3" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.4"/>
+                  <rect x="606" y="524" width="42" height="20" rx="3" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.4"/>
+                  <rect x="944" y="262" width="42" height="20" rx="3" fill="#fbfcfd" stroke="#d3dbe4" stroke-width="1.4"/>
+                </g>
+                <g id="ego-car" transform="translate(452 274) rotate(-30)" filter="url(#glow)">
+                  <rect x="-22" y="-12" width="44" height="24" rx="4" fill="#a8762e"/>
+                  <rect x="-13" y="-8" width="18" height="16" rx="3" fill="#e2c493"/>
+                </g>
+              </g>
+
+              <!-- 人流与热力（默认关闭） -->
+              <g id="layer-heatmap" opacity="0" fill="#c14434">
+                <circle cx="600" cy="400" r="86" opacity="0.09"/>
+                <circle cx="980" cy="380" r="62" opacity="0.08"/>
+                <circle cx="210" cy="660" r="54" opacity="0.07"/>
+              </g>
+              <g id="layer-pedestrians" opacity="0" fill="#3a5a8c">
+                <circle cx="403" cy="300" r="3.2"/><circle cx="403" cy="360" r="3.2"/><circle cx="403" cy="420" r="3.2"/>
+                <circle cx="796" cy="320" r="3.2"/><circle cx="796" cy="380" r="3.2"/><circle cx="796" cy="440" r="3.2"/>
+                <circle cx="520" cy="268" r="3.2"/><circle cx="580" cy="268" r="3.2"/><circle cx="640" cy="268" r="3.2"/>
+                <circle cx="900" cy="530" r="3.2"/><circle cx="960" cy="530" r="3.2"/><circle cx="1020" cy="530" r="3.2"/>
+                <circle cx="200" cy="268" r="3.2"/><circle cx="260" cy="268" r="3.2"/>
+              </g>
+            </svg>
+            <div class="map-overlay" id="map-overlay"></div>
+          </div>
+
+          <button class="compass" id="compass" title="复位视角"><svg aria-hidden="true"><use href="#i-nav"/></svg></button>
+
+          <div class="stream-badge" id="stream-badge">
+            <span class="dot is-live"></span>
+            <svg class="ico sm" aria-hidden="true" style="color:var(--muted)"><use href="#i-stream"/></svg>
+            <span class="tag">MJPEG</span>
+            <button title="关闭像素流标记"><svg class="ico sm" aria-hidden="true"><use href="#i-x"/></svg></button>
+          </div>
+        </div>
+
+        <div class="panel-foot map-foot">
+          <div class="map-stat"><span class="tag">Vehicles</span><b id="city-vehicles">--</b></div>
+          <div class="map-stat"><span class="tag">Pedestrians</span><b id="city-peds">--</b></div>
+          <div class="map-stat"><span class="tag">AQI</span><b id="city-aqi">--</b></div>
+          <div class="map-stat is-alert"><span class="tag">Alerts</span><b id="city-alerts">--</b></div>
+          <p class="map-coords" id="map-coords">31.2304° N · 121.4737° E</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ---------------------------------------- 右栏：指挥控件 -->
+    <div class="deck-col right">
+
+      <section class="panel" id="panel-command" data-domain="command">
+        <div class="panel-head">
+          <span class="tag">Command</span>
+          <span class="head-title">调度指令</span>
+          <span class="head-sub">· UrbanAgent</span>
+          <span class="dot is-live" id="agent-dot"></span>
+          <span class="head-spacer"></span>
+          <button class="icon-btn" data-collapse="panel-command" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="panel-body card-body">
+          <div class="cmd-row">
+            <select class="field" id="cmd-target" aria-label="执行后端">
+              <option value="CARLA">CARLA</option>
+              <option value="ZRDDS">ZRDDS</option>
+              <option value="UE4">UE4</option>
+            </select>
+            <select class="field" id="cmd-priority" aria-label="任务优先级">
+              <option value="NORMAL">普通</option>
+              <option value="HIGH">紧急</option>
+              <option value="CRITICAL">最高</option>
+            </select>
+          </div>
+          <form class="cmd-send" id="cmd-form">
+            <input class="field" id="cmd-input" autocomplete="off" placeholder="例如：生成车辆并自动驾驶 / 前进 / 停止">
+            <button class="btn-primary" type="submit">发送</button>
+          </form>
+          <div class="cmd-log" id="cmd-log"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-fleet" data-domain="command">
+        <div class="panel-head">
+          <span class="tag">Fleet</span>
+          <span class="head-title">智能体状态</span>
+          <span class="head-spacer"></span>
+          <button class="icon-btn" data-collapse="panel-fleet" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="panel-body fleet" id="fleet"></div>
+      </section>
+
+      <section class="panel" id="panel-sys" data-domain="system">
+        <div class="panel-head">
+          <span class="tag">Sys</span>
+          <span class="head-title">系统遥测</span>
+          <span class="dot is-live"></span>
+          <span class="head-spacer"></span>
+          <span class="tag is-plain" id="sys-fps">-- fps</span>
+          <button class="icon-btn" data-collapse="panel-sys" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="panel-body sys">
+          <div class="sys-cell"><div class="sys-head"><span class="tag">CPU</span><b id="sys-cpu">--%</b></div><div class="bar"><i id="sys-cpu-bar" style="width:0%"></i></div></div>
+          <div class="sys-cell"><div class="sys-head"><span class="tag">GPU</span><b id="sys-gpu">--%</b></div><div class="bar"><i id="sys-gpu-bar" style="width:0%"></i></div></div>
+          <div class="sys-cell"><div class="sys-head"><span class="tag">MEM</span><b id="sys-mem">--%</b></div><div class="bar"><i id="sys-mem-bar" style="width:0%"></i></div></div>
+          <div class="sys-cell"><div class="sys-head"><span class="tag">NET</span><b id="sys-net">--%</b></div><div class="bar"><i id="sys-net-bar" style="width:0%"></i></div></div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-tool" data-domain="system">
+        <div class="panel-head">
+          <span class="tag">Tool</span>
+          <span class="head-title">CARLA 坐标定位</span>
+          <span class="head-sub" id="tool-state">· 待命</span>
+          <span class="head-spacer"></span>
+          <button class="icon-btn" data-collapse="panel-tool" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="panel-body card-body">
+          <div class="coord-grid">
+            <label class="coord-cell"><span class="tag">X</span><input class="field" id="coord-x" type="number" step="0.1" value="-113.5"></label>
+            <label class="coord-cell"><span class="tag">Y</span><input class="field" id="coord-y" type="number" step="0.1" value="-14.9"></label>
+            <label class="coord-cell"><span class="tag">Z</span><input class="field" id="coord-z" type="number" step="0.1" value="0"></label>
+            <label class="coord-cell"><span class="tag">H</span><input class="field" id="coord-h" type="number" step="1" value="80"></label>
+          </div>
+          <label class="coord-cell"><span class="tag">Label</span><input class="field" id="coord-label" value="TARGET"></label>
+          <div class="tool-actions">
+            <button class="btn-ghost" id="tool-current"><svg class="ico sm" aria-hidden="true"><use href="#i-crosshair"/></svg>当前车</button>
+            <button class="btn-ghost" id="tool-mark"><svg class="ico sm" aria-hidden="true"><use href="#i-pin"/></svg>标记</button>
+            <button class="btn-ghost" id="tool-jump"><svg class="ico sm" aria-hidden="true"><use href="#i-jump"/></svg>跳转</button>
+          </div>
+          <button class="btn-ghost is-wide" id="tool-fire"><svg class="ico sm" aria-hidden="true"><use href="#i-target"/></svg>设为火点标签</button>
+          <p class="hint">输入 CARLA 坐标后可在鸟瞰图中标记或跳转视角</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
