@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>数字孪生城市指挥中心 · URBAN DIGITAL TWIN</title>
+  <title>基于智能体的无人机无人车任务调度系统</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -37,37 +37,27 @@
   <header class="topbar">
     <div class="brand">
       <span class="brand-mark"><svg class="ico" aria-hidden="true"><use href="#i-brand"/></svg></span>
-      <div>
-        <p class="tag">Urban · Digital Twin</p>
-        <p class="brand-name">数字孪生城市指挥中心</p>
+      <div class="brand-copy">
+        <p class="brand-name">基于智能体的无人机无人车任务调度系统</p>
       </div>
     </div>
 
-    <div class="topbar-center">
-      <div class="link-state">
-        <span class="dot" id="link-dot"></span>
-        <span class="tag" id="link-text">Connecting</span>
+    <div class="topbar-meta">
+      <div class="service-states" aria-label="系统链路状态">
+        <div class="service-state link-state"><span class="dot" id="link-dot"></span><span><small>MASTER AGENT</small><b id="link-text">连接中</b></span></div>
+        <div class="service-state"><span class="dot" id="device-dot"></span><span><small>DEVICE</small><b>UAV / UGV</b></span></div>
+        <div class="service-state"><span class="dot" id="dds-dot"></span><span><small>MIDDLEWARE</small><b>DDS</b></span></div>
       </div>
-      <span class="pill is-demo" id="mode-pill"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>Demo</span>
-
+      <span class="pill is-demo" id="mode-pill"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>演示数据</span>
       <div class="clock">
         <span class="clock-time" id="clock-time">--:--:--</span>
         <span class="clock-date" id="clock-date">----.--.-- UTC+8</span>
       </div>
-
-      <div class="topbar-stats">
-        <div class="stat-pair"><span class="tag">FPS</span><b id="stat-fps">--</b></div>
-        <div class="stat-pair"><span class="tag">Agents</span><b id="stat-agents">--</b></div>
-      </div>
-    </div>
-
-    <div class="topbar-actions">
-      <button class="btn is-sim" id="sim-1" aria-pressed="false"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>开始模拟1</button>
-      <button class="btn is-sim" id="sim-2" aria-pressed="false"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>开始模拟2</button>
-      <button class="btn is-mono" id="sim-reset"><svg class="ico sm" aria-hidden="true"><use href="#i-reset"/></svg>Reset</button>
+      <div class="topbar-actions" aria-label="控制台工具">
       <button class="icon-btn" id="toggle-log" aria-pressed="false" title="事件日志"><svg class="ico" aria-hidden="true"><use href="#i-log"/></svg></button>
       <button class="icon-btn" id="force-sync" title="立即刷新遥测"><svg class="ico" aria-hidden="true"><use href="#i-sync"/></svg></button>
       <button class="icon-btn" id="open-settings" aria-pressed="false" title="链路设置"><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg></button>
+      </div>
     </div>
   </header>
 
@@ -79,7 +69,7 @@
 
       <section class="panel" id="panel-aerial" data-domain="sense">
         <div class="panel-head">
-          <span class="tag">Aerial</span>
+          <span class="tag">UAV</span>
           <div class="seg" role="tablist" aria-label="无人机视图">
             <button role="tab" aria-selected="false" data-view="patrol">巡检视角</button>
             <button role="tab" aria-selected="true" data-view="detect">实时检测</button>
@@ -93,7 +83,7 @@
             <img alt="" id="feed-uav-img">
             <div class="feed-scan"></div>
             <div class="feed-empty"><svg aria-hidden="true"><use href="#i-nosignal"/></svg><span>No Signal</span></div>
-            <p class="feed-label">UAV Live Detection</p>
+            <p class="feed-label">UAV 实时检测</p>
             <button class="feed-action" data-refeed="uav">刷新实时流</button>
           </div>
         </div>
@@ -107,7 +97,7 @@
 
       <section class="panel" id="panel-ground" data-domain="sense">
         <div class="panel-head">
-          <span class="tag">Ground</span>
+          <span class="tag">UGV</span>
           <span class="head-title">无人车视角</span>
           <span class="head-sub">· CARLA-EGO</span>
           <span class="dot is-live"></span>
@@ -120,7 +110,7 @@
             <img alt="" id="feed-ugv-img">
             <div class="feed-scan"></div>
             <div class="feed-empty"><svg aria-hidden="true"><use href="#i-nosignal"/></svg><span>No Signal</span></div>
-            <p class="feed-label">Real UGV View</p>
+            <p class="feed-label">UGV 实时视角</p>
             <button class="feed-action" data-refeed="ugv">刷新实时流</button>
           </div>
         </div>
@@ -138,24 +128,22 @@
     <div class="deck-col center">
       <section class="panel map-panel" id="panel-map" data-domain="map">
         <div class="panel-head">
-          <span class="tag">Map-3D</span>
-          <span class="head-title">3D 鸟瞰视图</span>
-          <span class="head-sub">· 城市数字孪生</span>
+          <span class="tag">Mission Map</span>
+          <span class="head-title">空地协同任务态势</span>
+          <span class="head-sub">· UAV / UGV</span>
           <span class="dot is-live"></span>
           <span class="head-spacer"></span>
           <div class="toggles">
-            <button class="toggle" data-layer="vehicles" aria-pressed="true">Vehicles</button>
-            <button class="toggle" data-layer="pedestrians" aria-pressed="false">Pedestrians</button>
-            <button class="toggle" data-layer="signals" aria-pressed="true">Signals</button>
-            <button class="toggle" data-layer="heatmap" aria-pressed="false">Heatmap</button>
-            <button class="toggle" data-layer="pixelstream" aria-pressed="true">UE4 Pixel Stream</button>
+            <button class="toggle" data-layer="vehicles" aria-pressed="true">设备</button>
+            <button class="toggle" data-layer="signals" aria-pressed="true">任务路径</button>
+            <button class="toggle" data-layer="pixelstream" aria-pressed="true">视频流</button>
           </div>
           <button class="icon-btn" data-full="panel-map" title="全屏"><svg class="ico" aria-hidden="true"><use href="#i-full"/></svg></button>
         </div>
 
         <div class="panel-body map-body">
           <div class="map-viewport" id="map-viewport">
-            <svg class="map-scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-label="城市数字孪生鸟瞰图">
+            <svg class="map-scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-label="无人机无人车协同任务鸟瞰图">
               <defs>
                 <pattern id="grid-minor" width="20" height="20" patternUnits="userSpaceOnUse">
                   <path d="M20 0H0V20" fill="none" stroke="#dfe5ec" stroke-width="1"/>
@@ -414,11 +402,11 @@
         </div>
 
         <div class="panel-foot map-foot">
-          <div class="map-stat"><span class="tag">Vehicles</span><b id="city-vehicles">--</b></div>
-          <div class="map-stat"><span class="tag">Pedestrians</span><b id="city-peds">--</b></div>
-          <div class="map-stat"><span class="tag">AQI</span><b id="city-aqi">--</b></div>
-          <div class="map-stat is-alert"><span class="tag">Alerts</span><b id="city-alerts">--</b></div>
-          <p class="map-coords" id="map-coords">31.2304° N · 121.4737° E</p>
+          <div class="map-stat"><span class="tag">在线设备</span><b id="city-vehicles">--</b></div>
+          <div class="map-stat"><span class="tag">UAV</span><b id="city-peds">--</b></div>
+          <div class="map-stat"><span class="tag">UGV</span><b id="city-aqi">--</b></div>
+          <div class="map-stat is-alert"><span class="tag">执行中</span><b id="city-alerts">--</b></div>
+          <p class="map-coords" id="map-coords">CARLA → ENU · UAV / UGV 共用坐标系</p>
         </div>
       </section>
     </div>
@@ -428,9 +416,9 @@
 
       <section class="panel" id="panel-command" data-domain="command">
         <div class="panel-head">
-          <span class="tag">Command</span>
-          <span class="head-title">调度指令</span>
-          <span class="head-sub">· UrbanAgent</span>
+          <span class="tag">Master Agent</span>
+          <span class="head-title">任务调度</span>
+          <span class="head-sub">· 协同指令</span>
           <span class="dot is-live" id="agent-dot"></span>
           <span class="head-spacer"></span>
           <button class="icon-btn" data-collapse="panel-command" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
@@ -452,6 +440,12 @@
             <input class="field" id="cmd-input" autocomplete="off" placeholder="例如：生成车辆并自动驾驶 / 前进 / 停止">
             <button class="btn-primary" type="submit">发送</button>
           </form>
+          <div class="scenario-tools" aria-label="演示场景控制">
+            <span class="tag">演示场景</span>
+            <button class="btn is-sim" id="sim-1" aria-pressed="false"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>UAV 勘测</button>
+            <button class="btn is-sim" id="sim-2" aria-pressed="false"><svg class="ico sm" aria-hidden="true"><use href="#i-flame"/></svg>UGV 投送</button>
+            <button class="icon-btn scenario-reset" id="sim-reset" title="复位演示"><svg class="ico sm" aria-hidden="true"><use href="#i-reset"/></svg></button>
+          </div>
           <div class="cmd-log" id="cmd-log"></div>
         </div>
       </section>
@@ -459,8 +453,9 @@
       <section class="panel" id="panel-fleet" data-domain="command">
         <div class="panel-head">
           <span class="tag">Fleet</span>
-          <span class="head-title">智能体状态</span>
+          <span class="head-title">智能体 / 设备状态</span>
           <span class="head-spacer"></span>
+          <span class="head-count"><b id="stat-agents">--</b> 席位</span>
           <button class="icon-btn" data-collapse="panel-fleet" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
         </div>
         <div class="panel-body fleet" id="fleet"></div>
@@ -469,7 +464,7 @@
       <section class="panel" id="panel-sys" data-domain="system">
         <div class="panel-head">
           <span class="tag">Sys</span>
-          <span class="head-title">系统遥测</span>
+          <span class="head-title">系统状态</span>
           <span class="dot is-live"></span>
           <span class="head-spacer"></span>
           <span class="tag is-plain" id="sys-fps">-- fps</span>
@@ -485,8 +480,8 @@
 
       <section class="panel" id="panel-tool" data-domain="system">
         <div class="panel-head">
-          <span class="tag">Tool</span>
-          <span class="head-title">CARLA 坐标定位</span>
+          <span class="tag">Coordinate</span>
+          <span class="head-title">坐标转换</span>
           <span class="head-sub" id="tool-state">· 待命</span>
           <span class="head-spacer"></span>
           <button class="icon-btn" data-collapse="panel-tool" title="折叠"><svg class="ico chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
@@ -505,7 +500,7 @@
             <button class="btn-ghost" id="tool-jump"><svg class="ico sm" aria-hidden="true"><use href="#i-jump"/></svg>跳转</button>
           </div>
           <button class="btn-ghost is-wide" id="tool-fire"><svg class="ico sm" aria-hidden="true"><use href="#i-target"/></svg>设为火点标签</button>
-          <p class="hint">输入 CARLA 坐标后可在鸟瞰图中标记或跳转视角</p>
+          <p class="hint">输入 CARLA 坐标，在协同任务地图中标记或跳转</p>
         </div>
       </section>
 

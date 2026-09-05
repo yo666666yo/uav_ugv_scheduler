@@ -1,12 +1,11 @@
-/* 数字孪生城市指挥中心 · 前端逻辑
+/* UAV / UGV 多智能体协同调度控制台 · 前端逻辑
  *
  * 数据来源按优先级：
  *   1. master_agent (FastAPI)  GET /api/agents, /api/missions, WS /ws/events, POST /api/chat
  *   2. DashboardBridge 快照     telemetry.json（ZRDDS C++ 沙盘写出）
  *   3. 都不可用时进入 DEMO 模式，顶栏 DEMO 标记常亮
  *
- * 城市级指标（VEHICLES / PEDESTRIANS / AQI / ALERTS）与 CPU/GPU/MEM/NET
- * 本仓库没有数据源，为演示态推演值；FPS 与 LINK 为实测值。
+ * 设备统计来自 Agent 状态；CPU/GPU/MEM/NET 在无后端数据时为演示态推演值。
  */
 
 const CONFIG = Object.assign({
@@ -43,7 +42,6 @@ const state = {
   marks: [],               // 手动标记
   sim: null,               // 运行中的场景
   layers: { vehicles: true, pedestrians: false, signals: true, heatmap: false, pixelstream: true },
-  city: { vehicles: 802, peds: 30000, aqi: 35, alerts: 1 },
   sys: { cpu: 52, gpu: 34, mem: 35, net: 10 },
   fps: 50,
   showEvents: false,
@@ -191,6 +189,7 @@ function renderFleet() {
   }).join("");
   $("fleet").innerHTML = html;
   $("stat-agents").textContent = state.agents.length || "--";
+  $("device-dot").className = `dot ${state.agents.some((agent) => !agent.placeholder && agent.online) ? "is-live" : "is-idle"}`;
 }
 
 function markPosition(agent) {
@@ -254,10 +253,11 @@ function renderFeedMetrics() {
 }
 
 function renderCity() {
-  $("city-vehicles").textContent = group(state.city.vehicles);
-  $("city-peds").textContent = group(state.city.peds);
-  $("city-aqi").textContent = group(state.city.aqi);
-  $("city-alerts").textContent = group(state.city.alerts);
+  const reported = state.agents.filter((agent) => !agent.placeholder);
+  $("city-vehicles").textContent = group(reported.filter((agent) => agent.online).length);
+  $("city-peds").textContent = group(reported.filter((agent) => agent.kind === "UAV" && agent.online).length);
+  $("city-aqi").textContent = group(reported.filter((agent) => agent.kind === "UGV" && agent.online).length);
+  $("city-alerts").textContent = group(reported.filter((agent) => agent.state === "EXECUTING").length);
 }
 
 function renderSys() {
@@ -267,7 +267,6 @@ function renderSys() {
     $(`sys-${key}-bar`).style.width = `${value}%`;
   }
   $("sys-fps").textContent = `${Math.round(state.fps)} fps`;
-  $("stat-fps").textContent = Math.round(state.fps);
 }
 
 function setLink(mode) {
@@ -277,12 +276,16 @@ function setLink(mode) {
   const pill = $("mode-pill");
   if (mode === "master") {
     dot.className = "dot is-live"; text.textContent = "Master Agent"; pill.hidden = true;
+    $("dds-dot").className = "dot is-idle";
   } else if (mode === "telemetry") {
     dot.className = "dot is-live"; text.textContent = "ZRDDS Bridge"; pill.hidden = true;
+    $("dds-dot").className = "dot is-live";
   } else if (mode === "connecting") {
     dot.className = "dot is-warn"; text.textContent = "Connecting"; pill.hidden = false;
+    $("dds-dot").className = "dot is-idle";
   } else {
     dot.className = "dot is-error"; text.textContent = "Offline"; pill.hidden = false;
+    $("dds-dot").className = "dot is-idle";
   }
   $("agent-dot").className = `dot ${mode === "master" ? "is-live" : "is-warn"}`;
 }
@@ -340,6 +343,7 @@ function afterData() {
   renderFleet();
   renderMap();
   renderFeedMetrics();
+  renderCity();
 }
 
 /* ------------------------------------------------------------ WebSocket */
@@ -371,14 +375,10 @@ function drift(value, lo, hi, amount) {
 }
 
 function stepDemoNumbers() {
-  state.city.vehicles = Math.round(drift(state.city.vehicles, 640, 980, 14));
-  state.city.peds = Math.round(drift(state.city.peds, 26000, 34000, 400));
-  state.city.aqi = Math.round(drift(state.city.aqi, 22, 68, 2));
   state.sys.cpu = drift(state.sys.cpu, 28, 84, 5);
   state.sys.gpu = drift(state.sys.gpu, 18, 76, 6);
   state.sys.mem = drift(state.sys.mem, 30, 62, 2);
   state.sys.net = drift(state.sys.net, 6, 42, 3);
-  renderCity();
   renderSys();
 }
 
@@ -449,7 +449,6 @@ function startScenario(id) {
   stopScenario();
   state.sim = id;
   $(id).setAttribute("aria-pressed", "true");
-  state.city.alerts = scenario.alerts;
   renderCity();
   $("tool-state").textContent = `· ${scenario.name}`;
   log(`场景「${scenario.name}」开始推演，目标编队 ${scenario.kind}`);
@@ -472,7 +471,6 @@ function stopScenario() {
 function resetConsole() {
   stopScenario();
   state.marks = [];
-  state.city.alerts = 1;
   $("map-viewport").style.transform = "";
   $("compass").querySelector("svg").style.transform = "";
   $("tool-state").textContent = "· 待命";
@@ -530,7 +528,7 @@ function bind() {
       button.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", "false"));
       button.setAttribute("aria-selected", "true");
       $("feed-uav").querySelector(".feed-label").textContent =
-        button.dataset.view === "detect" ? "UAV Live Detection" : "UAV Patrol View";
+        button.dataset.view === "detect" ? "UAV 实时检测" : "UAV 巡检视角";
     });
   });
 
@@ -640,8 +638,6 @@ function addMark(isFire) {
   const label = ($("coord-label").value || "TARGET").trim();
   state.marks.push({ left: at.left, top: at.top, label, fire: isFire });
   if (isFire) {
-    state.city.alerts += 1;
-    renderCity();
   }
   $("tool-state").textContent = isFire ? "· 火点已标记" : "· 已标记";
   renderMap();
