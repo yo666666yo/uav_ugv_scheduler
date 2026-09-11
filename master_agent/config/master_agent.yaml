@@ -10,11 +10,11 @@ master_agent:
     stale_warn_s: 3.0
     offline_s: 5.0
 
-  # LLM 任务解析（不配置 key 时自动降级为正则解析）
+  # LLM 任务解析（deepseek | openai；不配置对应 key 时自动降级为正则解析）
   llm:
     provider: deepseek
     model: deepseek-chat
-    # api_key 从环境变量 DEEPSEEK_API_KEY 读取，不要写进仓库
+    # api_key 从 DEEPSEEK_API_KEY 或 OPENAI_API_KEY 读取，不要写进仓库
 
   server:
     host: 0.0.0.0

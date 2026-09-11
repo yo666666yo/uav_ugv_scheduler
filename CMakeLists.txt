@@ -7,6 +7,25 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 set(ZRDDS_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." CACHE PATH "ZRDDS SDK root")
 set(GENERATED_DIR "${CMAKE_CURRENT_LIST_DIR}/generated")
+option(BUILD_ZRDDS_DEMO "Build the Windows ZRDDS scheduler demo" ON)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(task_plan_parser_test
+        tests/task_plan_parser_test.cpp
+        src/task_plan.cpp)
+    target_include_directories(task_plan_parser_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src")
+    if(MSVC)
+        target_compile_options(task_plan_parser_test PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(task_plan_parser_test PRIVATE -Wall -Wextra -Werror)
+    endif()
+    add_test(
+        NAME task_plan_parser
+        COMMAND task_plan_parser_test "${CMAKE_CURRENT_LIST_DIR}/task_plan.example.json")
+endif()
+
+if(BUILD_ZRDDS_DEMO)
 
 set(GENERATED_SOURCES
     "${GENERATED_DIR}/mission.cpp"
@@ -18,7 +37,7 @@ foreach(source_file IN LISTS GENERATED_SOURCES)
     endif()
 endforeach()
 
-add_executable(scheduler_demo src/main.cpp ${GENERATED_SOURCES})
+add_executable(scheduler_demo src/main.cpp src/task_plan.cpp ${GENERATED_SOURCES})
 target_include_directories(scheduler_demo PRIVATE
     "${ZRDDS_ROOT}/include/ZRDDSCoreInterface"
     "${ZRDDS_ROOT}/include/CPlusPlusInterface"
@@ -37,3 +56,4 @@ add_custom_command(TARGET scheduler_demo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${ZRDDS_ROOT}/lib/ZRDDSCpp_VS2015.dll"
         "$<TARGET_FILE_DIR:scheduler_demo>/ZRDDSCpp_VS2015.dll")
+endif()

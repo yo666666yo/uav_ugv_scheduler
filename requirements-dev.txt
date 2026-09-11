@@ -1,0 +1,3 @@
+-r requirements.txt
+-r master_agent/requirements.txt
+pytest>=8,<10

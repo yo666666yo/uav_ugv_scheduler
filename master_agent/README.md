@@ -15,7 +15,7 @@ master_agent/
 │   ├── registry.py          # 设备状态目录：1s 心跳 / 3s 警告 / 5s 离线（架构说明 4.2）
 │   ├── scheduler.py         # 最近可用设备调度：能力过滤 + 欧氏距离（架构说明 4.3）
 │   ├── mission_fsm.py       # 任务状态机：核查→判定→清理→完成 + 失败重分配（架构说明 4.4）
-│   ├── parser.py            # 对话任务解析：DeepSeek LLM + 正则降级（架构说明 4.1）
+│   ├── parser.py            # 对话任务解析：OpenAI/DeepSeek + 正则降级（架构说明 4.1）
 │   ├── device_agent.py      # 设备 Agent：WS 接入总 Agent、SIM 执行层（可替换为真适配器）
 │   └── server.py            # 网页后端 + /ws/agent 设备网关
 └── tests/                   # 8 个 pytest（单元 + 多进程 e2e 闭环）
@@ -23,8 +23,16 @@ master_agent/
 
 ## 快速开始
 
+可选配置任意一个 LLM；不配置 Key 也可使用，此时自动从文本中用正则提取坐标：
+
 ```bash
-pip install fastapi uvicorn httpx pydantic websockets pytest
+export LLM_PROVIDER=deepseek
+export DEEPSEEK_API_KEY="..."
+# 或：export LLM_PROVIDER=openai; export OPENAI_API_KEY="..."
+```
+
+```bash
+pip install -r requirements.txt
 
 # 终端 1：起总 Agent
 python main.py --port 8100
