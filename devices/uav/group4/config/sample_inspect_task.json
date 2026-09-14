@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "timestamp_ms": 1788230001123,
+  "mission_id": "mission_001",
+  "task_id": "task_inspect_001",
+  "target_agent_id": "drone_001",
+  "task_type": "INSPECT_TARGET",
+  "target_pose": {
+    "frame_id": "uwb_map",
+    "x_m": 3.2,
+    "y_m": 5.1,
+    "z_m": 0.0,
+    "yaw_rad": null
+  },
+  "parameters": {
+    "inspection_distance_m": 0.0,
+    "inspection_height_m": 0.8,
+    "stable_time_s": 2.0,
+    "target_label": "person",
+    "target_confidence": 0.45,
+    "return_after_capture": true
+  }
+}

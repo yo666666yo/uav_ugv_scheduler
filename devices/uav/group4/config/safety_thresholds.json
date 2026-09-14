@@ -1,0 +1,24 @@
+{
+  "battery": {
+    "task_min_percent": 40.0,
+    "return_home_percent": 25.0,
+    "critical_land_percent": 15.0,
+    "status_stale_seconds": 3.0
+  },
+  "position": {
+    "warning_seconds": 0.5,
+    "failure_seconds": 2.0,
+    "maximum_jump_m": 0.5,
+    "recovery_stable_seconds": 2.0
+  },
+  "communication": {
+    "coordinator_warning_seconds": 1.0,
+    "coordinator_failure_seconds": 3.0,
+    "fcu_warning_seconds": 1.0,
+    "fcu_failure_seconds": 3.0
+  },
+  "emergency": {
+    "allow_land_without_valid_position": false
+  },
+  "calibration_status": "PLACEHOLDER_VALUES_REQUIRE_REAL_DEVICE_VALIDATION"
+}

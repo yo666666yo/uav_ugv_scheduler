@@ -1,0 +1,35 @@
+{
+  "agent": {
+    "agent_id": "drone_003",
+    "agent_type": "UAV",
+    "control_mode": "REAL",
+    "real_control_enabled": false
+  },
+  "vendor_interface": {
+    "implementation": "fancinnov/fcu_core_ros2_ws",
+    "transport_from_bridge_to_fcu": "TCP",
+    "flight_controller_host": null,
+    "flight_controller_port": 333,
+    "command_topic": "/fcu_command/command",
+    "mission_topic": "/fcu_mission/mission_003",
+    "state_topic": "odom_global_003",
+    "battery_topic": "batt_now_003",
+    "frame_id": "uwb_map",
+    "uwb_tag_id": 3,
+    "use_uwb": true,
+    "simple_target": true
+  },
+  "activation_requirements": {
+    "teacher_authorization": false,
+    "mlink_network_configured": false,
+    "uwb_tag_id_verified": false,
+    "flight_controller_ip_verified": false,
+    "propellers_removed_for_bench_test": false,
+    "flight_area_cleared": false,
+    "uwb_position_verified": false,
+    "battery_threshold_verified": false,
+    "flight_bounds_filled": false,
+    "no_fly_zones_filled": false,
+    "manual_takeover_ready": false
+  }
+}

@@ -1,0 +1,1 @@
+{"schema_version":"1.0","message_type":"TASK_ASSIGNMENT","timestamp":"2026-09-03T10:30:00+08:00","mission_id":"mission_001","task_id":"task_inspect_001","target_agent_id":"drone_001","task_type":"INSPECT_TARGET","parameters":{"target_position":{"frame_id":"uwb_map","x_m":2.5,"y_m":3.0,"z_m":0.0},"inspection_height_m":0.8,"target_label":"garbage"}}
