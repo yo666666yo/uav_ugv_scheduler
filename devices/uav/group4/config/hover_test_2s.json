@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "timestamp_ms": 1788418635042,
+  "mission_id": "hover-test-2s",
+  "task_id": "hover-test-2s",
+  "target_agent_id": "drone_001",
+  "task_type": "HOVER_TEST",
+  "target_pose": {
+    "frame_id": "uwb_map",
+    "x_m": 0.0,
+    "y_m": 0.0,
+    "z_m": 0.0,
+    "yaw_rad": 0.0
+  },
+  "parameters": {
+    "height_m": 0.8,
+    "duration_s": 2.0
+  }
+}
